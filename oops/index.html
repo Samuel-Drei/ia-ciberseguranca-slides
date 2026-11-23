@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acesso</title>
+<style>
+:root{--red:#e5141c;--bg:#0a0a0a;--line:#2a2a2a;--tx:#ececec;--dim:#8d8d8d;--mono:ui-monospace,"IBM Plex Mono",Consolas,Menlo,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:var(--bg);color:var(--tx);font-family:var(--mono)}
+body{display:flex;justify-content:center;padding:24px 18px 40px;position:relative}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px)}
+main{width:100%;max-width:520px;display:flex;flex-direction:column;gap:22px;padding-top:8px}
+.top{display:flex;justify-content:space-between;font-size:13px;color:var(--dim);border-bottom:1px solid var(--line);padding-bottom:10px}
+.top b{color:var(--red)}
+h2{font-size:22px;line-height:1.3}
+em{font-style:normal;color:var(--red)}
+p{font-size:16px;line-height:1.55;color:#cfcfcf}
+.col{display:flex;flex-direction:column;gap:20px}
+.hide{display:none!important}
+.log{font-size:14px;line-height:1.7;color:#7dffa3;min-height:200px;white-space:pre-wrap}
+body.hacked{background:#000}
+body.hacked .top b{animation:blink .6s steps(1) infinite}
+.pwn{font-size:46px;line-height:1.05;font-weight:700;color:var(--red);text-align:center;animation:shake .25s infinite;text-shadow:-3px 0 #18e5ff,3px 0 #ff1e28}
+.skull{font-size:84px;text-align:center;color:var(--red)}
+.cd{font-size:56px;text-align:center;color:#fff}
+@keyframes blink{50%{opacity:0}}
+@keyframes shake{0%{transform:translate(0)}25%{transform:translate(2px,-1px)}50%{transform:translate(-2px,1px)}75%{transform:translate(1px,2px)}100%{transform:translate(0)}}
+.rev{border:1px solid var(--red);padding:20px;background:rgba(229,20,28,.06)}
+.rev h2{margin-bottom:12px}
+.big{font-size:26px;line-height:1.25;font-weight:700}
+ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+li{font-size:16px;line-height:1.5;color:#e4e4e4}li b{color:var(--red);margin-right:8px}
+.safe{color:#7dffa3;font-size:14px}
+@media (prefers-reduced-motion:reduce){.pwn,.top b{animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><span>root@qr:~$</span><b id="st">conectando</b></div>
+
+  <section id="sc" class="col">
+    <h2>Conectando…</h2>
+    <div class="log" id="log"></div>
+  </section>
+
+  <section id="sh" class="col hide">
+    <div class="skull">☠</div>
+    <div class="pwn">VOCÊ FOI HACKEADO</div>
+    <p style="text-align:center">Seus dados estão sendo copiados.</p>
+    <div class="cd" id="cd">00:07</div>
+  </section>
+
+  <section id="sr" class="col hide">
+    <div class="rev">
+      <h2>Calma. <em>Era uma demonstração.</em></h2>
+      <p>Nada foi invadido, copiado ou instalado. Esta página não coleta nenhum dado seu.</p>
+    </div>
+    <p class="big">Você escaneou um QR code <em>sem saber de onde veio.</em></p>
+    <p>Foi só isso. Num golpe de verdade, essa mesma página poderia pedir sua senha, instalar um app falso ou abrir uma tela de banco clonada.</p>
+    <h2>Nunca escaneie QR code de desconhecidos:</h2>
+    <ul>
+      <li><b>▸</b>Em cartaz, mesa, e-mail, mensagem ou nota fiscal: <em>desconfie.</em></li>
+      <li><b>▸</b>Confira o endereço que aparece antes de abrir.</li>
+      <li><b>▸</b>Nunca digite senha ou código depois de escanear.</li>
+      <li><b>▸</b>Na dúvida, entre no site digitando o endereço você mesmo.</li>
+    </ul>
+    <p>Ninguém quebrou o seu celular: <em>você abriu a porta.</em> É o que o artigo conclui: o elo mais fraco continua sendo a pessoa.</p>
+    <p class="safe">[ nenhum dado coletado · nenhum cookie · nenhuma requisição externa ]</p>
+  </section>
+</main>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  function show(id){["sc","sh","sr"].forEach(function(s){$(s).classList.toggle("hide",s!==id)});window.scrollTo(0,0)}
+  var L=["> abrindo conexão…","> lendo seu dispositivo…","> procurando falha humana…","> falha encontrada.","> acesso obtido."];
+  var el=$("log"),k=0;
+  var t=setInterval(function(){el.textContent+=L[k]+"\n";k++;if(k>=L.length){clearInterval(t);setTimeout(hack,600)}},600);
+  function hack(){
+    document.body.classList.add("hacked");$("st").textContent="COMPROMETIDO";
+    show("sh");
+    var s=7,cd=$("cd");
+    var c=setInterval(function(){s--;cd.textContent="00:0"+Math.max(s,0);if(s<=0){clearInterval(c);reveal()}},1000);
+    if(navigator.vibrate){try{navigator.vibrate([200,100,200])}catch(e){}}
+  }
+  function reveal(){document.body.classList.remove("hacked");$("st").textContent="online";show("sr")}
+})();
+</script>
+</body>
+</html>
