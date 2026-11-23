@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mesma IA, dois lados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#0a0a0a;--panel:#141414;--line:#2a2a2a;--tx:#ececec;--dim:#8d8d8d;--red:#e5141c;--stage-bg:#000;--slide-bg:#0a0a0a;
+--mono:'IBM Plex Mono',ui-monospace,monospace;--ease:cubic-bezier(.16,1,.3,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--mono);color:var(--tx)}
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   Include this ENTIRE file in every presentation.
+   Slides are authored at 1920×1080 and scaled as a whole.
+   =========================================== */
+
+/* 1. Lock the browser viewport */
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 2. Full-window deck viewport */
+.deck-viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 3. Fixed 16:9 design canvas.
+   JavaScript sets transform: translate(...) scale(...). */
+.deck-stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    transform-origin: 0 0;
+    background: var(--slide-bg, #fff);
+}
+
+/* 4. Slides stack inside the fixed stage.
+   Content must be laid out at 1920×1080, not reflowed per device. */
+.slide {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    background: var(--slide-bg, #fff);
+}
+
+.slide.active,
+.slide.visible {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+}
+
+/* 5. Keep media inside authored slide bounds */
+img,
+video,
+canvas,
+svg {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* 6. Presentation chrome stays outside the slide design system */
+.deck-controls {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+/* 7. Print one fixed-size slide per page */
+@media print {
+    html,
+    body {
+        width: 1920px;
+        height: auto;
+        overflow: visible;
+        background: #fff;
+    }
+
+    .deck-viewport {
+        position: static;
+        overflow: visible;
+        background: #fff;
+    }
+
+    .deck-stage {
+        position: static;
+        width: auto;
+        height: auto;
+        transform: none !important;
+        background: none;
+    }
+
+    .slide {
+        position: relative;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        width: 1920px;
+        height: 1080px;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .slide:last-child {
+        break-after: auto;
+        page-break-after: auto;
+    }
+
+    .deck-controls {
+        display: none !important;
+    }
+}
+
+/* 8. Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+}
+
+.slide{background:radial-gradient(ellipse at 50% 40%,#141414 0%,#0a0a0a 60%,#050505 100%);color:var(--tx)}
+/* scanlines + vignette */
+.slide::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 4px);mix-blend-mode:overlay}
+.slide::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:4;box-shadow:inset 0 0 260px rgba(0,0,0,.85)}
+.top{position:absolute;left:0;right:0;top:0;height:84px;padding:0 100px;display:flex;justify-content:space-between;align-items:center;font-size:24px;color:var(--dim);border-bottom:1px solid var(--line);z-index:3}
+.ps i{font-style:normal;color:var(--red)}.ps u{text-decoration:none;color:var(--tx)}
+.cur{display:inline-block;width:.6em;height:1.05em;background:var(--red);margin-left:6px;vertical-align:-.15em;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.body{position:absolute;inset:84px 0 0 0;padding:60px 100px 70px;z-index:3;display:flex;flex-direction:column;gap:36px}
+.two{display:grid;grid-template-columns:1.05fr .95fr;gap:80px;align-items:center;flex:1}
+.center-col{margin:auto 0;display:flex;flex-direction:column;gap:30px}
+/* type */
+h1{font:700 150px/1.02 var(--mono);letter-spacing:-.04em;text-transform:uppercase}
+h2{font:700 78px/1.08 var(--mono);letter-spacing:-.03em;margin-bottom:28px}
+h3{font:700 36px/1.2 var(--mono);margin-bottom:12px}
+p{font-size:30px;line-height:1.45}
+em{font-style:normal;color:var(--red)}
+.hello{font-size:34px;color:var(--red)}.sub{font-size:38px;color:var(--dim);max-width:1400px}.by{font-size:28px;color:var(--dim)}
+.ask{font:700 64px var(--mono);color:var(--red)}
+.foot{font-size:28px;color:var(--dim);margin-top:auto}
+/* glitch */
+.glitch{position:relative}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;pointer-events:none}
+.glitch::before{color:var(--red);transform:translate(-4px,0)}.glitch::after{color:#18e5ff;transform:translate(4px,0)}
+.slide.visible .glitch::before,.slide.visible .glitch::after{animation:gl 5s steps(1) infinite}
+.slide.visible .glitch::after{animation-delay:.07s}
+@keyframes gl{0%,6%{opacity:.8;clip-path:inset(10% 0 60% 0)}8%{opacity:.8;clip-path:inset(55% 0 12% 0)}10%,100%{opacity:0}}
+/* cues */
+.cues{list-style:none;display:flex;flex-direction:column;gap:22px}
+.cues li{display:flex;gap:20px;font-size:38px;line-height:1.3}.cues b{color:var(--red);font-weight:700}
+/* cards */
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:20px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.card{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--red);padding:36px}.card p{color:#c9c9c9;font-size:28px}
+.grid4 .card{min-height:360px}
+.file{background:var(--panel);border:1px solid var(--line);padding:34px;display:flex;flex-direction:column;gap:16px}.file p{font-size:27px}.file b{color:var(--red);margin-right:10px}
+.num{font:700 230px/1 var(--mono);color:#fff}.num.red{color:var(--red)}.lbl{color:var(--dim);font-size:30px}
+/* exp chart */
+.chart{position:relative;height:560px;border-left:2px solid var(--line);border-bottom:2px solid var(--line);padding:0 0 0 20px}
+.xbars{display:flex;align-items:flex-end;gap:16px;height:100%}.xb{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:8px}
+.xb i{display:block;width:100%;height:var(--h);background:var(--red);transform-origin:bottom;transform:scaleY(0);transition:transform .9s var(--ease) .4s}
+.slide.visible .xb i{transform:scaleY(1)}.xb span{font-size:24px;color:var(--dim)}
+.ceil{position:absolute;left:0;right:0;top:14px;border-top:2px dashed #666}.ceil span{position:absolute;right:0;top:-34px;color:#999;font-size:24px}
+.cap{position:absolute;bottom:-52px;left:20px;color:var(--dim);font-size:24px}
+.box{width:100%;color:#ddd;max-height:640px}
+/* callout */
+.callout{border:1px solid var(--red);padding:56px;background:rgba(229,20,28,.06)}.callout .q{font:700 64px/1.1 var(--mono)}.callout .a{font-size:42px;margin:24px 0;color:#fff}.callout .n{color:var(--dim);font-size:28px}
+/* duo */
+.duo{display:flex;align-items:stretch;gap:36px;flex:1;margin-top:10px}.pane{flex:1;background:var(--panel);border:1px solid var(--line);padding:50px}.pane.hot{border-color:var(--red)}
+.pane h3{font-size:56px;margin-bottom:28px}.pane.hot h3{color:var(--red)}.pane p{font-size:38px;line-height:1.7}.eq{align-self:center;font:700 120px var(--mono);color:var(--red)}
+/* bars */
+.bars{display:flex;flex-direction:column;gap:30px;margin:10px 0}.bar{display:grid;grid-template-columns:680px 1fr 130px;align-items:center;gap:28px;font-size:32px}
+.bar b{font-size:46px}.track{height:46px;background:#1a1a1a}.track i{display:block;height:100%;width:0;background:#ddd;transition:width 1.1s var(--ease) .4s}.track i.hot{background:var(--red)}.slide.visible .track i{width:var(--w)}
+/* rows */
+.rows{display:flex;flex-direction:column;gap:26px}.row{display:grid;grid-template-columns:330px 1fr;gap:28px;align-items:center;background:var(--panel);border:1px solid var(--line);padding:26px 30px}.row.hot{border-color:var(--red)}
+.tag{font:700 34px var(--mono)}.tag em{display:block;font-size:56px;margin-top:4px}
+.chain{display:flex;align-items:center;gap:16px}.chain i{font-style:normal;color:var(--red);font-size:44px}.chain span{flex:1;display:flex;flex-direction:column;gap:4px}.chain b{font-size:36px}.chain small{font-size:24px;color:var(--dim)}
+/* yuri */
+.yuri{border:1px solid var(--line);background:var(--panel);padding:56px;display:flex;flex-direction:column;gap:18px;align-items:flex-start}
+.mono{width:180px;height:180px;border-radius:50%;border:4px solid var(--red);display:grid;place-items:center;font:700 72px var(--mono);color:var(--red)}
+.yuri h3{font-size:64px;margin:10px 0 0}.yuri p{color:#c9c9c9}.yuri .vt{color:var(--red);font-size:34px;margin-top:14px}
+/* avatars */
+.avs{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;flex:1;align-items:center}
+.av{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+.circ{position:relative;width:290px;height:290px;border-radius:50%;overflow:hidden;background:var(--panel);border:3px solid var(--line);margin-bottom:14px;display:grid;place-items:center}
+.circ img{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover}.circ .fb{font:700 120px var(--mono);color:var(--red)}
+.av b{font-size:44px}.av em{font-size:24px;letter-spacing:.14em;text-transform:uppercase}.av .t{font-size:28px;color:#c9c9c9;max-width:400px;line-height:1.35}
+/* vs */
+.vs{display:grid;grid-template-columns:1fr 140px 1fr;align-items:center;text-align:center;flex:1}.vs>span{font-size:40px;color:var(--dim)}.vs .num{font-size:260px}
+.quote{font:700 64px/1.2 var(--mono);text-align:center}
+/* terminal */
+.term{background:#050505;border:1px solid var(--line);box-shadow:0 0 60px rgba(229,20,28,.15)}.tb{display:flex;gap:10px;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line);color:var(--dim);font-size:22px}
+.tb i{width:14px;height:14px;border-radius:50%;background:#333}.tb span{margin-left:auto}.term p{padding:36px;font-size:30px;line-height:1.55}.term b{color:var(--red)}
+/* crowd + stats */
+.crowd{display:flex;align-items:center;gap:30px;font-size:36px;margin:12px 0}.one{width:48px;height:48px;border-radius:50%;background:#999}
+.dots{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;width:360px}.dots i{aspect-ratio:1;border-radius:50%;background:var(--red)}
+.cues.sm{gap:20px}.cues.sm li{font-size:31px}
+.two>*{min-width:0}.stats.col1{grid-template-columns:1fr;align-content:center}.stats.col1 .stat{font-size:58px}.stats.col1 .card{padding:28px 36px}.stats.col1 .card p{font-size:28px}
+.callout.slim{padding:22px 40px}.callout.slim .q{font-size:46px}.callout.slim .q span{font-size:46px;font-weight:500}
+.rows .tag em:empty{display:none}.rows{gap:18px}.row{padding:20px 30px}.tag em{font-size:44px}.callout.slim{margin-top:4px}
+.yuri .circ{width:240px;height:240px;border:4px solid var(--red);margin-bottom:0}
+.fg .card{min-height:0;padding:30px 28px;display:flex;flex-direction:column;gap:18px}
+.find h3{font-size:44px;margin:0}.find h3 small{display:block;font-size:22px;color:var(--dim);font-weight:400;margin-top:6px}
+.find .k b{display:block;font-size:20px;letter-spacing:.16em;color:var(--red);margin-bottom:4px}.find .k p{font-size:25px;line-height:1.35;color:#e4e4e4}.find.ok{border-left-color:#7dffa3}.find.ok .k b{color:#7dffa3}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:24px}.stat{font:700 64px/1 var(--mono);color:var(--red);margin-bottom:14px}.stats .card p{font-size:25px}
+/* motion */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.slide.visible .reveal{opacity:1;transform:none}
+.cues li:nth-child(1){transition-delay:.15s}.cues li:nth-child(2){transition-delay:.35s}.cues li:nth-child(3){transition-delay:.55s}.cues li:nth-child(4){transition-delay:.75s}.cues li:nth-child(5){transition-delay:.95s}
+.grid4 .card:nth-child(n),.grid2 .card:nth-child(n),.avs .av:nth-child(n),.rows .row:nth-child(n){transition-delay:calc(.15s*var(--i,1))}
+/* chrome */
+.progress{position:fixed;left:0;top:0;height:3px;background:var(--red);z-index:1000;transition:width .4s var(--ease)}
+.hud{position:fixed;right:16px;bottom:14px;z-index:1000;font:600 15px var(--mono);color:#fff;background:rgba(0,0,0,.75);border:1px solid #333;padding:8px 14px;display:flex;gap:16px;align-items:center}
+.hud b{color:var(--red)}.hud .late{color:#ff6b6b}.hud .ok{color:#7dffa3}
+.hud button{background:none;border:0;color:#fff;font-size:18px;cursor:pointer}
+body.editing [contenteditable]{outline:2px dashed var(--red);outline-offset:4px}
+</style></head><body>
+<div class="progress" id="progress"></div>
+<div class="deck-viewport"><main class="deck-stage" id="deckStage">
+<section class="slide title" data-secs="30"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/boot</u>#<span class="cur"></span></span><span class="pg">01/19</span></div><div class="body"><div class="center-col"><p class="hello reveal">hello, friend.</p><h1 class="glitch " data-text="MESMA IA.&lt;br&gt;DOIS LADOS.">MESMA IA.<br>DOIS LADOS.</h1>
+<p class="sub reveal">IA e cibersegurança nas empresas: o que um artigo mediu e o que um hacker encontrou</p>
+<p class="by reveal">Samuel · Comunicação Oral e Escrita</p></div></div></section>
+<section class="slide " data-secs="40"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/por_que_ciberseguranca</u>#<span class="cur"></span></span><span class="pg">02/19</span></div><div class="body"><div class="two">
+<div><h2 class="glitch " data-text="Por que cibersegurança">Por que cibersegurança</h2><ul class="cues "><li class="reveal"><b>&gt;</b><span>hoje tudo é digital: banco, pix, sem caixa eletrônico</span></li><li class="reveal"><b>&gt;</b><span>mais dependência = <em>superfície de ataque</em> maior</span></li><li class="reveal"><b>&gt;</b><span>IA gera código de forma <em>exponencial</em>: 2 → 4 → 8 → 16…</span></li><li class="reveal"><b>&gt;</b><span>mas existe um teto — e está mais perto do que parece</span></li></ul></div>
+<div class="chart reveal"><div class="xbars"><div class="xb"><i style="--h:1.5625%"></i><span>2</span></div><div class="xb"><i style="--h:3.125%"></i><span>4</span></div><div class="xb"><i style="--h:6.25%"></i><span>8</span></div><div class="xb"><i style="--h:12.5%"></i><span>16</span></div><div class="xb"><i style="--h:25.0%"></i><span>32</span></div><div class="xb"><i style="--h:50.0%"></i><span>64</span></div><div class="xb"><i style="--h:100.0%"></i><span>128</span></div></div><div class="ceil"><span>teto?</span></div><p class="cap">código gerado com IA</p></div></div></div></section>
+<section class="slide " data-secs="40"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/superficie_de_ataque</u>#<span class="cur"></span></span><span class="pg">03/19</span></div><div class="body"><div class="two"><div><h2 class="glitch " data-text="Superfície de ataque">Superfície de ataque</h2><ul class="cues "><li class="reveal"><b>&gt;</b><span>software = uma <em>caixa</em></span></li><li class="reveal"><b>&gt;</b><span>a tampa tem várias entradas = a <em>superfície</em></span></li><li class="reveal"><b>&gt;</b><span>pentest = testar essas entradas</span></li><li class="reveal"><b>&gt;</b><span>só com autorização — senão é crime</span></li><li class="reveal"><b>&gt;</b><span>mais código, mais entradas</span></li></ul></div><div class="reveal"><svg viewBox="0 0 760 560" class="box" fill="none" stroke="currentColor" stroke-width="3">
+<rect x="150" y="250" width="460" height="250" fill="#111"/><text x="380" y="385" fill="currentColor" stroke="none" font-size="34" text-anchor="middle" font-family="IBM Plex Mono">SEU SOFTWARE</text>
+<rect x="130" y="205" width="500" height="30" fill="#161616"/>
+<g stroke="#e5141c" stroke-width="4"><path d="M200 60V200M200 200l-14-22M200 200l14-22"/><path d="M300 60V200M300 200l-14-22M300 200l14-22"/><path d="M400 60V200M400 200l-14-22M400 200l14-22"/><path d="M500 60V200M500 200l-14-22M500 200l14-22"/><path d="M610 60V200M610 200l-14-22M610 200l14-22"/></g>
+<g fill="currentColor" stroke="none" font-size="20" font-family="IBM Plex Mono" text-anchor="middle"><text x="200" y="40">login</text><text x="300" y="40">API</text><text x="400" y="40">form</text><text x="500" y="40">upload</text><text x="610" y="40">pessoas</text></g>
+<text x="380" y="545" fill="#e5141c" stroke="none" font-size="24" font-family="IBM Plex Mono" text-anchor="middle">tampa = superfície de ataque</text></svg></div></div></div></section>
+<section class="slide " data-secs="50"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/caso_binance</u>#<span class="cur"></span></span><span class="pg">04/19</span></div><div class="body"><div class="two"><div><h2 class="glitch " data-text="Caso Binance">Caso Binance</h2><ul class="cues sm"><li class="reveal"><b>&gt;</b><span>29/out/2026 · ~US$ 6,3 bi em <em>20 minutos</em>, 10 blockchains</span></li><li class="reveal"><b>&gt;</b><span>maior roubo de cripto da história · ~4× o Bybit (US$ 1,5 bi)</span></li><li class="reveal"><b>&gt;</b><span>Ethereum US$ 3,8 bi · Bitcoin US$ 1,5 bi (BTC não congela)</span></li><li class="reveal"><b>&gt;</b><span>FBI + TRM Labs: <em>TraderTraitor</em> (Lazarus, Coreia do Norte) · governo nega</span></li><li class="reveal"><b>&gt;</b><span>Binance cobre tudo (SAFU + caixa) → o <em>e-mail “fique calmo”</em> que recebi</span></li><li class="reveal"><b>&gt;</b><span>saques suspensos; ao reabrir, correria dos usuários</span></li></ul></div>
+<div class="stats col1"><div class="card reveal"><div class="stat">US$ 6,3 bi</div><p>levados em ~20 min, a maior parte</p></div><div class="card reveal"><div class="stat">US$ 2,7 bi</div><p>congelados por Tether e Circle; o resto escapou</p></div><div class="card reveal"><div class="stat">US$ 3,6 bi</div><p>saída líquida de usuários em 9 h, após reabrir saques</p></div></div></div></div></section>
+<section class="slide " data-secs="45"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/binance_como_entraram</u>#<span class="cur"></span></span><span class="pg">05/19</span></div><div class="body"><h2 class="glitch " data-text="Como entraram: pelas pessoas">Como entraram: pelas pessoas</h2><div class="rows"><div class="row reveal "><div class="tag">JUN<em>1º passo</em></div><div class="chain"><span><b>engenheiro A</b><small>baixa software infectado</small></span><i>→</i><span><b>detectado</b><small>malware removido</small></span><i>→</i><span><b>mas…</b><small>já sabiam quem é quem</small></span></div></div><div class="row reveal "><div class="tag">SET<em>2º passo</em></div><div class="chain"><span><b>engenheiro B</b><small>“entrevista de emprego” falsa</small></span><i>→</i><span><b>malware</b><small>não detectado</small></span><i>→</i><span><b>acesso</b><small>tomam máquinas e credenciais</small></span></div></div><div class="row reveal hot"><div class="tag">29/OUT<em>saque</em></div><div class="chain"><span><b>saques</b><small>não autorizados</small></span><i>→</i><span><b>20 min</b><small>US$ 6,3 bi</small></span><i>→</i><span><b>antes</b><small>meses de preparo</small></span></div></div></div><div class="callout reveal slim"><p class="q">senha ou pessoa? <span>→ quase sempre a <em>pessoa</em></span></p></div><p class="foot reveal">artigo: 3 de 4 ameaças citadas miram o humano · fonte: post-mortem da Binance</p></div></section>
+<section class="slide " data-secs="40"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/dualidade_da_ia</u>#<span class="cur"></span></span><span class="pg">06/19</span></div><div class="body"><h2 class="glitch " data-text="A mesma tecnologia, os dois lados">A mesma tecnologia, os dois lados</h2>
+<div class="duo"><div class="pane reveal"><h3>DEFENDE</h3><p>detecta ameaças<br>corrige vulnerabilidades<br>responde a incidentes</p></div><div class="eq reveal">=</div><div class="pane hot reveal"><h3>ATACA</h3><p>phishing personalizado<br>varredura automática<br>deepfake</p></div></div>
+<p class="foot reveal">por isso o artigo me chamou atenção</p></div></section>
+<section class="slide " data-secs="60"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/o_artigo</u>#<span class="cur"></span></span><span class="pg">07/19</span></div><div class="body"><div class="two"><div><h2 class="glitch " data-text="O artigo">O artigo</h2><div class="file reveal"><p><b>Título</b> Como a IA pode gerar novas ameaças e também aprimorar a cibersegurança nas empresas</p><p><b>Onde</b> Revista Eletrônica Multidisciplinar de Investigação Científica, 2025</p><p><b>Quem</b> Breviário et al.</p><p><b>Pergunta</b> a IA fortalece a defesa ou abre novas vulnerabilidades?</p></div></div>
+<div><div class="num reveal">181</div><p class="lbl reveal">empresários · 25 perguntas · Google Forms</p><ul class="cues "><li class="reveal"><b>&gt;</b><span>7 técnicas estatísticas (modelo pronto, não vou listar)</span></li><li class="reveal"><b>&gt;</b><span>sem pré-teste do questionário</span></li><li class="reveal"><b>&gt;</b><span>eram mesmo 181 empresários?</span></li></ul></div></div></div></section>
+<section class="slide " data-secs="45"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/resultados</u>#<span class="cur"></span></span><span class="pg">08/19</span></div><div class="body"><h2 class="glitch " data-text="Ameaças que os respondentes citaram">Ameaças que os respondentes citaram</h2><div class="bars"><div class="bar reveal"><span>Phishing personalizado com IA</span><div class="track"><i class="" style="--w:55%"></i></div><b>55%</b></div><div class="bar reveal"><span>Ataques automatizados</span><div class="track"><i class="" style="--w:25%"></i></div><b>25%</b></div><div class="bar reveal"><span>Engenharia social avançada</span><div class="track"><i class="" style="--w:15%"></i></div><b>15%</b></div><div class="bar reveal"><span>Deepfakes manipulatórios</span><div class="track"><i class="hot" style="--w:5%"></i></div><b>5%</b></div></div><ul class="cues "><li class="reveal"><b>&gt;</b><span>3 de 4 miram o <em>humano</em>; só a automação não</span></li><li class="reveal"><b>&gt;</b><span>fonte: artigo, p. 41</span></li></ul></div></section>
+<section class="slide " data-secs="40"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/conclusao_do_artigo</u>#<span class="cur"></span></span><span class="pg">09/19</span></div><div class="body"><h2 class="glitch " data-text="“A IA ajuda a defender, mas exige preparo”">“A IA ajuda a defender, mas exige preparo”</h2><div class="grid4"><div class="card reveal"><h3>Maturidade digital</h3><p>a maior diferença: empresa consolidada, equipe experiente</p></div><div class="card reveal"><h3>Sistema legado</h3><p>IA sem contexto pode abrir novas falhas</p></div><div class="card reveal"><h3>Ética e transparência</h3><p>modelos privados: não sabemos o que fazem</p></div><div class="card reveal"><h3>55% “totalmente preparadas”</h3><p>palavra forte demais (35% “preparadas”)</p></div></div></div></section>
+<section class="slide " data-secs="70"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/ameacas_por_dentro</u>#<span class="cur"></span></span><span class="pg">10/19</span></div><div class="body"><h2 class="glitch " data-text="Como cada ameaça funciona">Como cada ameaça funciona</h2><div class="rows"><div class="row reveal "><div class="tag">PHISHING<em>55%</em></div><div class="chain"><span><b>coleta</b><small>dados públicos</small></span><i>→</i><span><b>geração</b><small>tom conhecido</small></span><i>→</i><span><b>confiança</b><small>não estranha</small></span><i>→</i><span><b>ação</b><small>clica / paga</small></span></div></div><div class="row reveal "><div class="tag">AUTOMAÇÃO<em>25%</em></div><div class="chain"><span><b>varredura</b><small>falhas conhecidas</small></span><i>→</i><span><b>priorização</b><small>alvo mais fácil</small></span><i>→</i><span><b>escala</b><small>vários sistemas</small></span><i>→</i><span><b>entrada</b><small>sem patch</small></span></div></div><div class="row reveal hot"><div class="tag">DEEPFAKE<em>5%</em></div><div class="chain"><span><b>material</b><small>vídeo / áudio</small></span><i>→</i><span><b>treino</b><small>rosto e voz</small></span><i>→</i><span><b>síntese</b><small>fala nova</small></span><i>→</i><span><b>engano</b><small>ligação / chamada</small></span></div></div></div><p class="foot reveal">travas dos modelos existem — e podem ser contornadas (jailbreak)</p></div></section>
+<section class="slide " data-secs="50"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/o_experimento</u>#<span class="cur"></span></span><span class="pg">11/19</span></div><div class="body"><div class="two"><div class="yuri reveal"><div class="circ"><span class="fb">YD</span><img src="ameacas-assets/yuri.png" alt="Yuri Dev" onerror="this.remove()"></div><h3>Yuri Dev</h3><p>pentester e criador de conteúdo de segurança</p><p class="vt">▶ “1 hacker vs 4 vibecoders”</p></div>
+<div><h2 class="glitch " data-text="O teste que completa o artigo">O teste que completa o artigo</h2><ul class="cues "><li class="reveal"><b>&gt;</b><span>o artigo mediu o que empresas <em>dizem</em>; o teste mostra o que <em>acontece</em></span></li><li class="reveal"><b>&gt;</b><span>4 devs: Júnior, Pleno, Sênior e Especialista</span></li><li class="reveal"><b>&gt;</b><span>cada um constrói um sistema</span></li><li class="reveal"><b>&gt;</b><span><em>só IA</em>: sem escrever, sem revisar = vibe coding</span></li><li class="reveal"><b>&gt;</b><span>1 hacker tenta invadir cada um</span></li></ul></div></div></div></section>
+<section class="slide " data-secs="30"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/os_quatro</u>#<span class="cur"></span></span><span class="pg">12/19</span></div><div class="body"><h2 class="glitch " data-text="Os 4 vibecoders">Os 4 vibecoders</h2><div class="avs"><div class="av reveal"><div class="circ"><span class="fb">G</span><img src="ameacas-assets/gean.png" alt="Gean" onerror="this.remove()"></div><b>Gean</b><em>Júnior</em><span class="t">Rede social</span></div><div class="av reveal"><div class="circ"><span class="fb">S</span><img src="ameacas-assets/skully.png" alt="Skully" onerror="this.remove()"></div><b>Skully</b><em>Pleno</em><span class="t">Plataforma de cursos</span></div><div class="av reveal"><div class="circ"><span class="fb">M</span><img src="ameacas-assets/mjunior.png" alt="MJunior" onerror="this.remove()"></div><b>MJunior</b><em>Sênior</em><span class="t">Marketplace</span></div><div class="av reveal"><div class="circ"><span class="fb">A</span><img src="ameacas-assets/aviator.png" alt="Aviator" onerror="this.remove()"></div><b>Aviator</b><em>Especialista</em><span class="t">Plataforma de cursos</span></div></div></div></section>
+<section class="slide " data-secs="75"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/o_que_o_hacker_achou</u>#<span class="cur"></span></span><span class="pg">13/19</span></div><div class="body"><h2 class="glitch " data-text="O teste confirma o artigo">O teste confirma o artigo</h2><div class="grid4 fg"><div class="card find reveal "><h3>Gean<small>Júnior · rede social</small></h3><div class="k"><b>FALHA</b><p><em>segredo exposto</em> no código: quem lê usa a chave</p></div><div class="k"><b>LIGA COM O ARTIGO</b><p>falta de preparo: a IA gerou, ninguém revisou</p></div><div class="k"><b>LIÇÃO</b><p>chave fora do código; revisar antes de publicar</p></div></div><div class="card find reveal "><h3>Skully<small>Pleno · cursos</small></h3><div class="k"><b>FALHA</b><p><em>dinheiro do nada</em>: comprar 2 cursos juntos reembolsa os 2</p></div><div class="k"><b>LIGA COM O ARTIGO</b><p>IA sem contexto do negócio abre falha</p></div><div class="k"><b>LIÇÃO</b><p>regra de dinheiro valida no servidor; teste o abuso</p></div></div><div class="card find reveal ok"><h3>MJunior<small>Sênior · marketplace</small></h3><div class="k"><b>RESULTADO</b><p><em>zero falhas</em>: framework que testa o próprio sistema, etapa por etapa</p></div><div class="k"><b>LIGA COM O ARTIGO</b><p>IA ajuda a defender <em>quando há preparo</em></p></div><div class="k"><b>LIÇÃO</b><p>testar a cada etapa, não só no fim</p></div></div><div class="card find reveal "><h3>Aviator<small>Especialista · cursos</small></h3><div class="k"><b>FALHA</b><p><em>falha crítica</em> de lógica no saldo (Supabase)</p></div><div class="k"><b>LIGA COM O ARTIGO</b><p>título não basta: aceitou a IA sem testar</p></div><div class="k"><b>LIÇÃO</b><p>confiar e conferir: IA amplifica o que você sabe</p></div></div></div><p class="foot reveal">artigo: “a IA ajuda a defender, mas exige preparo” · o teste mostra <em>qual</em> preparo</p></div></section>
+<section class="slide " data-secs="45"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/mesma_ferramenta</u>#<span class="cur"></span></span><span class="pg">14/19</span></div><div class="body"><div class="vs"><div class="reveal"><div class="num">0</div><p class="lbl">falhas · testava cada etapa</p></div><span class="reveal">vs</span><div class="reveal"><div class="num red">∞</div><p class="lbl">saldo · só aceitava as respostas da IA</p></div></div>
+<p class="quote reveal">“A IA não substitui conhecimento. Ela <em>amplifica</em>.”</p></div></section>
+<section class="slide " data-secs="75"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/dica_do_yuri_dev</u>#<span class="cur"></span></span><span class="pg">15/19</span></div><div class="body"><div class="two"><div><h2 class="glitch " data-text="Dica do Yuri Dev">Dica do Yuri Dev</h2><ul class="cues "><li class="reveal"><b>&gt;</b><span>peça à IA para <em>atacar o seu próprio sistema</em></span></li><li class="reveal"><b>&gt;</b><span>faça a cada etapa, não só no fim</span></li><li class="reveal"><b>&gt;</b><span>corrija e repita: a superfície diminui antes do invasor</span></li><li class="reveal"><b>&gt;</b><span>só no seu sistema, com autorização</span></li></ul></div>
+<div class="term reveal"><div class="tb"><i></i><i></i><i></i><span>prompt</span></div><p><b>$</b> Aja como um atacante experiente. Analise o meu sistema (rotas, autenticação, pagamentos, segredos) e liste as vulnerabilidades que você exploraria, da mais crítica para a menos. Para cada uma: como explorar e como corrigir.<span class="cur"></span></p></div></div></div></section>
+<section class="slide " data-secs="40"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/em_escala_ibm_2025</u>#<span class="cur"></span></span><span class="pg">16/19</span></div><div class="body"><div class="two"><div><h2 class="glitch " data-text="E numa empresa inteira?">E numa empresa inteira?</h2><div class="crowd reveal"><i class="one"></i><span>1 pessoa</span></div><div class="crowd reveal"><div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span>equipe</span></div><ul class="cues "><li class="reveal"><b>&gt;</b><span>mais gente = mais repasses: a falha passa de mão em mão</span></li></ul></div>
+<div class="stats"><div class="card reveal"><div class="stat">97%</div><p>das empresas com incidente de IA sem controle de acesso adequado</p></div><div class="card reveal"><div class="stat">63%</div><p>sem governança de IA nem detecção de shadow AI</p></div><div class="card reveal"><div class="stat">+US$ 670 mil</div><p>de custo com muito shadow AI</p></div><div class="card reveal"><div class="stat">−US$ 1,9 mi</div><p>e 80 dias a menos com defesa que usa muita IA</p></div></div></div><p class="foot">IBM Cost of a Data Breach 2025 · 600 organizações</p></div></section>
+<section class="slide " data-secs="35"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/defesas</u>#<span class="cur"></span></span><span class="pg">17/19</span></div><div class="body"><h2 class="glitch " data-text="Uma defesa para cada ameaça">Uma defesa para cada ameaça</h2><div class="grid4"><div class="card reveal"><h3>Phishing</h3><p>confirmar por um segundo canal</p></div><div class="card reveal"><h3>Automação</h3><p>patches em dia + monitorar acessos</p></div><div class="card reveal"><h3>Deepfake</h3><p>palavra-código para pedidos incomuns</p></div><div class="card reveal"><h3>Shadow AI</h3><p>governança e controle de acesso</p></div></div><p class="foot reveal">nenhuma depende de tecnologia cara — todas dependem de <em>processo</em></p></div></section>
+<section class="slide " data-secs="40"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/limites_do_artigo</u>#<span class="cur"></span></span><span class="pg">18/19</span></div><div class="body"><h2 class="glitch " data-text="Limites do artigo">Limites do artigo</h2><div class="grid2"><div class="card reveal"><h3>Números não fecham</h3><p>227 respostas (99+36+46+46) para 181 respondentes · p. 48</p></div><div class="card reveal"><h3>Estatística frágil</h3><p>R² = −0,58, mas o resumo fala em “análise robusta” · p. 57</p></div><div class="card reveal"><h3>Amostra frágil</h3><p>redes sociais, sem pré-teste</p></div><div class="card reveal"><h3>Referência que não confere</h3><p>“Chen et al. (2020)” sobre fraudes não bate com o Chen de 2012</p></div></div></div></section>
+<section class="slide title" data-secs="25"><div class="top"><span class="ps"><i>root@fsociety</i>:<u>~/palestra/exit</u>#<span class="cur"></span></span><span class="pg">19/19</span></div><div class="body"><div class="center-col"><h1 class="glitch " data-text="A IA protege e ataca.&lt;br&gt;O PREPARO DECIDE.">A IA protege e ataca.<br>O PREPARO DECIDE.</h1><p class="sub reveal">ataque o seu sistema antes que alguém ataque</p><p class="ask reveal">perguntas?<span class="cur"></span></p></div></div></section>
+</main></div>
+<nav class="hud"><button id="prev" aria-label="Anterior">‹</button><span id="hudTxt"></span><button id="next" aria-label="Próximo">›</button></nav>
+<script>
+class Deck{
+ constructor(){this.slides=[...document.querySelectorAll('.slide')];this.i=0;this.stage=document.getElementById('deckStage');
+  this.hud=document.getElementById('hudTxt');this.bar=document.getElementById('progress');this.editing=false;
+  let c=0;this.cum=this.slides.map(s=>{const a=c;c+=+s.dataset.secs;return a});this.total=c;
+  document.querySelectorAll('.grid4,.grid2,.avs,.rows').forEach(g=>[...g.children].forEach((k,n)=>k.style.setProperty('--i',n+1)));
+  const sc=()=>{const f=Math.min(innerWidth/1920,innerHeight/1080);this.stage.style.transform=`translate(${(innerWidth-1920*f)/2}px,${(innerHeight-1080*f)/2}px) scale(${f})`};sc();addEventListener('resize',sc);
+  addEventListener('keydown',e=>{if(e.target.isContentEditable)return;
+   if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();this.go(this.i+1)}
+   else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();this.go(this.i-1)}
+   else if(e.key==='Home')this.go(0);else if(e.key==='End')this.go(this.slides.length-1);
+   else if(e.key==='t'||e.key==='T')this.toggleTimer();else if(e.key==='e'||e.key==='E')this.edit()});
+  let sx=0;addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+  addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>50)this.go(this.i+(d<0?1:-1))});
+  document.getElementById('prev').onclick=()=>this.go(this.i-1);document.getElementById('next').onclick=()=>this.go(this.i+1);
+  this.t0=null;setInterval(()=>this.paint(),500);
+  const h=+location.hash.slice(1);this.go(h>0?h-1:0)}
+ fmt(s){s=Math.round(Math.abs(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+ toggleTimer(){this.t0=this.t0?null:Date.now();this.paint()}
+ go(n){this.i=Math.max(0,Math.min(n,this.slides.length-1));
+  this.slides.forEach((s,k)=>{s.classList.toggle('active',k===this.i);s.classList.toggle('visible',k===this.i)});
+  this.bar.style.width=((this.i+1)/this.slides.length*100)+'%';history.replaceState(null,'','#'+(this.i+1));this.paint()}
+ paint(){const s=this.slides[this.i];let t=`${this.i+1}/${this.slides.length} · slide ~${this.fmt(s.dataset.secs)} · alvo ${this.fmt(this.cum[this.i])}/${this.fmt(this.total)}`;
+  if(this.t0){const el=(Date.now()-this.t0)/1000,d=el-this.cum[this.i];t+=` · <b>⏱ ${this.fmt(el)}</b> <span class="${d>20?'late':'ok'}">${d>0?'+':'−'}${this.fmt(d)}</span>`}
+  else t+=' · T = cronômetro';this.hud.innerHTML=t}
+ edit(){this.editing=!this.editing;document.body.classList.toggle('editing',this.editing);
+  document.querySelectorAll('.slide h1,.slide h2,.slide h3,.slide p,.slide li span,.slide .t').forEach(el=>el.contentEditable=this.editing)}}
+new Deck();
+</script></body></html>

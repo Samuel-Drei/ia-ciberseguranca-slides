@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Por dentro das ameaças — IA e cibersegurança</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+:root{--navy:#0f1729;--navy2:#1a2744;--cream:#f3f0e8;--sand:#e8e2d4;--amber:#f2b134;--rust:#b8421a;--ink:#0f1729;--slate:#56607c;
+--font-display:'Bricolage Grotesque',sans-serif;--font-body:'Hanken Grotesk',sans-serif;--stage-bg:#05080f;--slide-bg:var(--navy);
+--ease:cubic-bezier(.16,1,.3,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+/* === BASE (viewport-base.css) === */
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   Include this ENTIRE file in every presentation.
+   Slides are authored at 1920×1080 and scaled as a whole.
+   =========================================== */
+
+/* 1. Lock the browser viewport */
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 2. Full-window deck viewport */
+.deck-viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 3. Fixed 16:9 design canvas.
+   JavaScript sets transform: translate(...) scale(...). */
+.deck-stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    transform-origin: 0 0;
+    background: var(--slide-bg, #fff);
+}
+
+/* 4. Slides stack inside the fixed stage.
+   Content must be laid out at 1920×1080, not reflowed per device. */
+.slide {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    background: var(--slide-bg, #fff);
+}
+
+.slide.active,
+.slide.visible {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+}
+
+/* 5. Keep media inside authored slide bounds */
+img,
+video,
+canvas,
+svg {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* 6. Presentation chrome stays outside the slide design system */
+.deck-controls {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+/* 7. Print one fixed-size slide per page */
+@media print {
+    html,
+    body {
+        width: 1920px;
+        height: auto;
+        overflow: visible;
+        background: #fff;
+    }
+
+    .deck-viewport {
+        position: static;
+        overflow: visible;
+        background: #fff;
+    }
+
+    .deck-stage {
+        position: static;
+        width: auto;
+        height: auto;
+        transform: none !important;
+        background: none;
+    }
+
+    .slide {
+        position: relative;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        width: 1920px;
+        height: 1080px;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .slide:last-child {
+        break-after: auto;
+        page-break-after: auto;
+    }
+
+    .deck-controls {
+        display: none !important;
+    }
+}
+
+/* 8. Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+}
+
+/* === THEMES === */
+.dark{background:var(--navy);color:#fff}.cream{background:var(--cream);color:var(--ink)}.amber{background:var(--amber);color:var(--ink)}
+.pad{padding:96px 120px;height:100%;position:relative}
+.fill{display:flex;flex-direction:column}
+.mid{justify-content:center}.center{justify-content:center;align-items:center}
+.split-v{justify-content:space-between}
+/* === TYPE === */
+.kicker{font:700 22px var(--font-body);letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin-bottom:28px}
+.cream .kicker{color:var(--rust)}.amber .kicker{color:var(--ink);opacity:.7}
+h1{font:800 128px/1.02 var(--font-display);letter-spacing:-.02em}
+h1.q{font-size:104px;max-width:1500px}
+h2{font:700 64px/1.12 var(--font-display);letter-spacing:-.01em;max-width:1500px;margin-bottom:56px}
+h3{font:700 32px/1.2 var(--font-display);margin-bottom:14px}
+p,li{font-size:28px;line-height:1.45}
+.lead{font-size:36px;line-height:1.4;opacity:.8;max-width:1300px;margin-top:32px}
+.meta{font-size:24px;opacity:.7}.src{font-size:22px;opacity:.65;margin-top:auto}
+.dim{opacity:.7;margin-top:48px}
+b{font-weight:700}
+/* === CARDS === */
+.cards{display:grid;gap:28px}.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:repeat(3,1fr)}.c4{grid-template-columns:repeat(4,1fr)}
+.card{border-radius:18px;padding:40px 36px}
+.cream .card{background:var(--sand)}.dark .card{background:var(--navy2)}
+.card p{font-size:26px;opacity:.8}
+.roteiro .num{font:800 72px var(--font-display);color:var(--rust);display:block;margin-bottom:12px}
+.steps{margin-top:20px}.steps .card{min-height:340px}.steps h3{font-size:36px}.dark .steps h3{color:var(--amber)}.cream .steps h3{color:var(--rust)}
+.defesa{margin-top:auto;font-size:26px;opacity:.85}.defesa b{color:var(--rust)}.dark .defesa b{color:var(--amber)}
+.crit .card{padding:36px 40px}.crit{gap:24px}.crit p{font-size:25px}.crit h3{font-size:30px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:100px;margin-top:100px}.two p{opacity:.8}
+/* === METODO === */
+.metodo{display:grid;grid-template-columns:1fr 1fr;gap:120px;align-items:center;flex:1}
+.big{font:800 220px/1 var(--font-display);color:var(--amber)}.big.rust{color:var(--rust);font-size:260px}
+.metodo h3{font-size:40px;margin-bottom:24px}.metodo ul{padding-left:36px}.metodo li{margin-bottom:10px;opacity:.9}
+/* === BARS === */
+.bars{display:flex;flex-direction:column;gap:36px;margin-top:20px}
+.bar{display:grid;grid-template-columns:520px 1fr 110px;align-items:center;gap:32px;font-size:30px}
+.bar b{font:800 40px var(--font-display)}.track{height:44px;background:var(--sand);border-radius:8px;overflow:hidden}
+.track i{display:block;height:100%;width:0;background:var(--slate);border-radius:8px;transition:width 1.1s var(--ease) .4s}
+.track i.hot{background:var(--rust)}.slide.visible .track i{width:var(--w)}
+/* === AVATARES (fotos reais) === */
+.avs{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;flex:1;align-items:center}
+.av{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+.circ{position:relative;width:280px;height:280px;border-radius:50%;overflow:hidden;background:var(--navy2);border:4px solid rgba(255,255,255,.14);margin-bottom:20px;display:grid;place-items:center}
+.circ img{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover}
+.circ .fb{font:800 120px var(--font-display);color:var(--amber)}
+.av b{font:700 40px var(--font-display)}
+.av em{font:700 22px var(--font-body);font-style:normal;letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}
+.av .t{font-size:28px;opacity:.8;max-width:380px;line-height:1.35}
+/* === VS === */
+.vs{display:grid;grid-template-columns:1fr 120px 1fr;align-items:center;text-align:center;flex:1}
+.vs>span{font:700 36px var(--font-display);opacity:.5}.vs .lead{margin:20px auto 0;font-size:32px}
+/* === QUOTE / 1→MANY / STATS === */
+.quote{font-size:136px;line-height:1.05;max-width:1500px}
+.one,.many{display:flex;align-items:center;gap:36px;font-size:48px}
+.d1{width:56px;height:56px;border-radius:50%;background:var(--slate)}
+.dots{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;width:360px}.dots i{aspect-ratio:1;border-radius:50%;background:var(--amber)}
+.arrow{font-size:64px;color:var(--amber);margin:36px 0}
+.stats{margin-top:8px}.stat{font:800 76px/1 var(--font-display);color:var(--amber);margin-bottom:18px}.stats p{font-size:26px}
+.ask{font:800 44px var(--font-display);margin-top:56px}
+/* === MOTION === */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.slide.visible .reveal{opacity:1;transform:none}
+.cards .reveal,.avs .reveal{transition-delay:calc(.12s * var(--i,1))}
+/* === CHROME (fora do palco) === */
+.deck-controls{display:flex;gap:14px;align-items:center;font:600 14px var(--font-body);color:#fff;background:rgba(15,23,41,.75);padding:8px 16px;border-radius:99px;opacity:0;transition:opacity .3s}
+body:hover .deck-controls{opacity:.9}
+.deck-controls button{background:none;border:0;color:#fff;font-size:18px;cursor:pointer}
+.progress{position:fixed;left:0;top:0;height:4px;background:var(--amber);z-index:1000;transition:width .4s var(--ease)}
+body.editing [contenteditable]{outline:2px dashed rgba(242,177,52,.6);outline-offset:4px}
+.edit-hotzone{position:fixed;top:0;left:0;width:80px;height:80px;z-index:10000}
+.edit-toggle{position:fixed;top:12px;left:12px;z-index:10001;opacity:0;pointer-events:none;transition:opacity .3s;background:var(--amber);border:0;border-radius:8px;padding:8px 12px;font:700 14px sans-serif;cursor:pointer}
+.edit-toggle.show,.edit-toggle.active{opacity:1;pointer-events:auto}
+</style></head><body>
+<div class="progress" id="progress"></div>
+<div class="edit-hotzone"></div><button class="edit-toggle" id="editToggle" title="Editar (E)">Editar</button>
+<div class="deck-viewport"><main class="deck-stage" id="deckStage">
+<section class="slide dark title"><div class="pad fill split-v"><p class="kicker reveal">Comunicação Oral e Escrita · Fichamento de artigo</p><div><h1 class="reveal">Por dentro das ameaças</h1><p class="lead reveal">IA e cibersegurança nas empresas: o que o artigo mediu e como cada ameaça realmente funciona</p></div><p class="meta reveal">[Seu nome] · [Turma e data]</p></div></section>
+<section class="slide cream "><div class="pad"><p class="kicker reveal">Por que esse tema</p><h2 class="reveal">Por que cibersegurança, por que esse artigo</h2><div class="two reveal"><div><h3>Por que escolhi a área</h3><p>[Sua motivação: carreira, curiosidade, um caso que viu, uma matéria do curso]</p></div><div><h3>Por que esse artigo me chamou</h3><p>Ele nomeia a <b>dualidade da IA</b>: a mesma tecnologia que defende uma empresa também amplia a <b>superfície de ataque</b> — o conjunto de pontos por onde um invasor pode tentar entrar.</p></div></div></div></section>
+<section class="slide dark "><div class="pad fill mid"><p class="kicker reveal">Para começar</p><h1 class="reveal q">O que é mais fácil para um atacante: adivinhar uma senha ou enganar uma pessoa?</h1><p class="lead reveal">Levantem a mão para a opção que acham mais fácil hoje, com ajuda de IA.</p></div></section>
+<section class="slide cream "><div class="pad"><p class="kicker reveal">Roteiro</p><h2 class="reveal">O que vamos ver</h2><div class="cards c4 roteiro"><div class="card reveal"><span class="num">1</span><h3>O artigo</h3><p>Problema, método e resultados</p></div><div class="card reveal"><span class="num">2</span><h3>Por dentro</h3><p>Como cada ameaça citada funciona, passo a passo</p></div><div class="card reveal"><span class="num">3</span><h3>Contexto e defesas</h3><p>Dados da IBM e como se proteger</p></div><div class="card reveal"><span class="num">4</span><h3>Crítica</h3><p>Limites do artigo e conclusão</p></div></div></div></section>
+<section class="slide cream "><div class="pad"><p class="kicker reveal">O artigo</p><h2 class="reveal">Como a IA pode gerar novas ameaças e também aprimorar a cibersegurança nas empresas</h2><div class="cards c3 "><div class="card reveal"><h3>Onde</h3><p>Revista Eletrônica Multidisciplinar de Investigação Científica, v. 4, n. 21, 2025</p></div><div class="card reveal"><h3>Quem</h3><p>Breviário et al.</p></div><div class="card reveal"><h3>Problema</h3><p>A IA fortalece a defesa das empresas ou abre novas vulnerabilidades?</p></div></div></div></section>
+<section class="slide dark "><div class="pad fill"><p class="kicker reveal">Método</p><div class="metodo"><div class="reveal"><div class="big">181</div><p class="lead">empresários responderam ao questionário</p></div><div class="reveal"><h3>Sete técnicas estatísticas</h3><ul><li>Estatística descritiva</li><li>Correlação</li><li>Regressão logística</li><li>Análise de componentes principais (PCA)</li><li>Qui-quadrado</li><li>ANOVA</li><li>Análise fatorial</li></ul></div></div></div></section>
+<section class="slide cream "><div class="pad fill"><p class="kicker reveal">Resultados</p><h2 class="reveal">Novas ameaças que os respondentes citaram</h2><div class="bars"><div class="bar reveal"><span>Phishing personalizado com IA</span><div class="track"><i class="" style="--w:55%"></i></div><b>55%</b></div><div class="bar reveal"><span>Ataques automatizados</span><div class="track"><i class="" style="--w:25%"></i></div><b>25%</b></div><div class="bar reveal"><span>Engenharia social avançada</span><div class="track"><i class="" style="--w:15%"></i></div><b>15%</b></div><div class="bar reveal"><span>Deepfakes manipulatórios</span><div class="track"><i class="hot" style="--w:5%"></i></div><b>5%</b></div></div><p class="src">Fonte: artigo, p. 41 (181 respondentes; deepfakes citados por 9)</p></div></section>
+<section class="slide dark "><div class="pad"><p class="kicker reveal">O que o artigo conclui</p><h2 class="reveal">A IA ajuda a defender, mas exige preparo</h2><div class="cards c3 "><div class="card reveal"><h3>Benefícios</h3><p>Detecção de ameaças e resposta a incidentes mais eficientes.</p></div><div class="card reveal"><h3>Desafios</h3><p>Integração com sistemas legados, treinamento especializado, riscos éticos e transparência dos algoritmos.</p></div><div class="card reveal"><h3>Autoimagem</h3><p>55% das empresas se dizem totalmente preparadas, com auditorias regulares (p. 48).</p></div></div></div></section>
+<section class="slide amber "><div class="pad fill mid"><p class="kicker reveal">Parte 2 · A superfície de ataque</p><h1 class="reveal">Cada ameaça é um novo ponto de entrada</h1><p class="lead reveal">A IA não cria essas três ameaças do zero — ela aumenta a superfície de ataque: mais mensagens, mais varreduras, mais vozes sintéticas, todas automatizadas em escala.</p></div></section>
+<section class="slide cream "><div class="pad fill"><p class="kicker reveal">Ameaça 1 de 3 · 55% das respostas</p><h2 class="reveal">Phishing personalizado com apoio de IA</h2><div class="cards c4 steps"><div class="card reveal"><h3>1. Coleta</h3><p>IA reúne dados públicos da vítima: cargo, redes sociais, estilo de escrita.</p></div><div class="card reveal"><h3>2. Geração</h3><p>IA escreve uma mensagem no tom de alguém conhecido (chefe, banco, fornecedor).</p></div><div class="card reveal"><h3>3. Confiança</h3><p>A vítima reconhece o tom e o contexto, e não estranha o pedido.</p></div><div class="card reveal"><h3>4. Ação</h3><p>Clica num link, informa uma senha ou autoriza um pagamento.</p></div></div><p class="src defesa reveal"><b>Defesa:</b> confirmar pedidos sensíveis por um segundo canal, nunca pelo mesmo contato da mensagem.</p></div></section>
+<section class="slide dark "><div class="pad fill"><p class="kicker reveal">Ameaça 2 de 3 · 25% das respostas</p><h2 class="reveal">Ataques automatizados explorando vulnerabilidades</h2><div class="cards c4 steps"><div class="card reveal"><h3>1. Varredura</h3><p>IA testa milhares de sistemas em busca de falhas já conhecidas e não corrigidas.</p></div><div class="card reveal"><h3>2. Priorização</h3><p>Classifica quais alvos têm a falha mais fácil de explorar.</p></div><div class="card reveal"><h3>3. Escala</h3><p>Repete a tentativa em muitos sistemas ao mesmo tempo, sem esforço humano extra.</p></div><div class="card reveal"><h3>4. Entrada</h3><p>Ganha acesso onde a falha não foi corrigida a tempo.</p></div></div><p class="src defesa reveal"><b>Defesa:</b> manter sistemas atualizados (patches) e monitorar tentativas de acesso fora do padrão.</p></div></section>
+<section class="slide cream "><div class="pad fill"><p class="kicker reveal">Ameaça 3 de 3 · Só 5% das respostas</p><h2 class="reveal">Deepfakes manipulatórios</h2><div class="cards c4 steps"><div class="card reveal"><h3>1. Material público</h3><p>IA usa vídeos e áudios já publicados de uma pessoa real.</p></div><div class="card reveal"><h3>2. Treinamento</h3><p>Um modelo aprende o rosto, a voz e os gestos dessa pessoa.</p></div><div class="card reveal"><h3>3. Síntese</h3><p>Gera fala ou vídeo novo, dizendo algo que a pessoa nunca disse.</p></div><div class="card reveal"><h3>4. Engano</h3><p>Usa isso numa ligação, mensagem de voz ou chamada para convencer alguém.</p></div></div><p class="src defesa reveal"><b>Defesa:</b> ter uma palavra-código ou canal alternativo para confirmar pedidos incomuns, mesmo vindo de voz ou vídeo conhecidos.</p></div></section>
+<section class="slide dark "><div class="pad fill"><p class="kicker reveal">Caso real · Experimento no YouTube</p><div class="avs"><div class="av reveal"><div class="circ"><span class="fb">G</span><img src="ameacas-assets/gean.png" alt="Gean" onerror="this.remove()"></div><b>Gean</b><em>Júnior</em><span class="t">Rede social</span></div><div class="av reveal"><div class="circ"><span class="fb">S</span><img src="ameacas-assets/skully.png" alt="Skully" onerror="this.remove()"></div><b>Skully</b><em>Pleno</em><span class="t">Plataforma de cursos</span></div><div class="av reveal"><div class="circ"><span class="fb">M</span><img src="ameacas-assets/mjunior.png" alt="MJunior" onerror="this.remove()"></div><b>MJunior</b><em>Sênior</em><span class="t">Marketplace</span></div><div class="av reveal"><div class="circ"><span class="fb">A</span><img src="ameacas-assets/aviator.png" alt="Aviator" onerror="this.remove()"></div><b>Aviator</b><em>Especialista em segurança</em><span class="t">Plataforma de cursos (de novo)</span></div></div></div></section>
+<section class="slide dark "><div class="pad fill"><p class="kicker reveal">O que o hacker encontrou, um por um</p><div class="avs"><div class="av reveal"><div class="circ"><span class="fb">G</span><img src="ameacas-assets/gean.png" alt="Gean" onerror="this.remove()"></div><b>Gean</b><span class="t">Segredo exposto no código</span></div><div class="av reveal"><div class="circ"><span class="fb">S</span><img src="ameacas-assets/skully.png" alt="Skully" onerror="this.remove()"></div><b>Skully</b><span class="t">Dinheiro do nada</span></div><div class="av reveal"><div class="circ"><span class="fb">M</span><img src="ameacas-assets/mjunior.png" alt="MJunior" onerror="this.remove()"></div><b>MJunior</b><span class="t">Zero vulnerabilidades</span></div><div class="av reveal"><div class="circ"><span class="fb">A</span><img src="ameacas-assets/aviator.png" alt="Aviator" onerror="this.remove()"></div><b>Aviator</b><span class="t">1 falha de lógica (no Supabase)</span></div></div></div></section>
+<section class="slide dark "><div class="pad fill"><p class="kicker reveal">Mesma ferramenta, resultado oposto</p><div class="vs"><div class="reveal"><div class="big">0</div><p class="lead">falhas · quem testava cada etapa</p></div><span class="reveal">vs</span><div class="reveal"><div class="big rust">∞</div><p class="lead">saldo · quem só aceitava as respostas da IA</p></div></div></div></section>
+<section class="slide amber "><div class="pad fill mid"><h1 class="reveal quote">“Ela não substitui conhecimento, ela amplifica.”</h1></div></section>
+<section class="slide dark "><div class="pad fill center"><div class="reveal one"><i class="d1"></i><span>1 pessoa.</span></div><div class="arrow reveal">↓</div><div class="reveal many"><div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span>E numa empresa inteira?</span></div></div></section>
+<section class="slide dark "><div class="pad fill"><p class="kicker reveal">Contexto · IBM Cost of a Data Breach 2025</p><h2 class="reveal">O que o relatório da IBM mostra</h2><div class="cards c2 stats"><div class="card reveal"><div class="stat">97%</div><p>das empresas com incidente de IA não tinham controle de acesso adequado</p></div><div class="card reveal"><div class="stat">63%</div><p>não tinham política de governança de IA nem de detecção de shadow AI</p></div><div class="card reveal"><div class="stat">+US$ 670 mil</div><p>de custo médio quando há muito shadow AI (IA usada sem aprovação)</p></div><div class="card reveal"><div class="stat">−US$ 1,9 mi</div><p>de custo e 80 dias a menos quando a defesa usa muita IA</p></div></div><p class="src">Fonte: IBM e Ponemon Institute, 2025 (600 organizações)</p></div></section>
+<section class="slide cream "><div class="pad fill"><p class="kicker reveal">Como se proteger</p><h2 class="reveal">Uma defesa para cada ameaça</h2><div class="cards c3 "><div class="card reveal"><h3>Contra phishing</h3><p>Confirmar pedidos sensíveis por um segundo canal, nunca pelo mesmo contato da mensagem.</p></div><div class="card reveal"><h3>Contra automação</h3><p>Manter sistemas atualizados e monitorar acessos fora do padrão.</p></div><div class="card reveal"><h3>Contra deepfake</h3><p>Ter uma palavra-código para confirmar pedidos incomuns, mesmo por voz ou vídeo.</p></div></div><p class="lead dim reveal">Nenhuma depende de tecnologia cara — todas dependem de processo.</p></div></section>
+<section class="slide cream "><div class="pad fill"><p class="kicker reveal">Olhar crítico</p><h2 class="reveal">Limites do artigo</h2><div class="cards c2 crit"><div class="card reveal"><h3>Os números não fecham</h3><p>Respostas sobre preparo regulatório somam 227 (99+36+46+46) para 181 respondentes (p. 48).</p></div><div class="card reveal"><h3>Estatística que não sustenta a conclusão</h3><p>O modelo de regressão teve R² = −0,58: prevê pior que a média, mas o resumo fala em “análise robusta” (p. 57).</p></div><div class="card reveal"><h3>Amostra frágil</h3><p>181 respondentes recrutados em redes sociais, sem pré-teste do questionário — limita a generalização.</p></div><div class="card reveal"><h3>Referência que não confere</h3><p>O artigo cita “Chen et al. (2020)” sobre detecção de fraudes, mas o Chen de 2012 encontrado trata de business intelligence em geral, não de fraude.</p></div></div></div></section>
+<section class="slide amber "><div class="pad fill mid"><p class="kicker reveal">Conclusão</p><h1 class="reveal">A IA protege e ataca. O preparo decide.</h1><p class="lead reveal">Vimos como cada ameaça do artigo funciona por dentro, e que a mais rara nas respostas (deepfake) é uma das mais simples de montar hoje.</p><p class="ask reveal">Perguntas?</p></div></section>
+</main></div>
+<nav class="deck-controls"><button id="prev" aria-label="Anterior">‹</button><span id="count"></span><button id="next" aria-label="Próximo">›</button></nav>
+<script>
+class SlidePresentation{
+ constructor(){this.slides=[...document.querySelectorAll('.slide')];this.i=0;this.stage=document.getElementById('deckStage');
+  this.count=document.getElementById('count');this.bar=document.getElementById('progress');this.editing=false;
+  document.querySelectorAll('.cards,.avs').forEach(c=>[...c.children].forEach((k,n)=>k.style.setProperty('--i',n+1)));
+  const sc=()=>{const f=Math.min(innerWidth/1920,innerHeight/1080);this.stage.style.transform=`translate(${(innerWidth-1920*f)/2}px,${(innerHeight-1080*f)/2}px) scale(${f})`};sc();addEventListener('resize',sc);
+  addEventListener('keydown',e=>{if(this.editing&&e.target.isContentEditable)return;
+   if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();this.go(this.i+1)}
+   else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();this.go(this.i-1)}
+   else if(e.key==='Home')this.go(0);else if(e.key==='End')this.go(this.slides.length-1);
+   else if(e.key==='e'||e.key==='E')this.edit();});
+  let sx=0;addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+  addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>50)this.go(this.i+(d<0?1:-1))});
+  let lock=0;addEventListener('wheel',e=>{if(Date.now()<lock)return;lock=Date.now()+600;this.go(this.i+(e.deltaY>0?1:-1))},{passive:true});
+  document.getElementById('prev').onclick=()=>this.go(this.i-1);document.getElementById('next').onclick=()=>this.go(this.i+1);
+  const h=+location.hash.slice(1);this.go(h>0?h-1:0)}
+ go(n){this.i=Math.max(0,Math.min(n,this.slides.length-1));
+  this.slides.forEach((s,k)=>{s.classList.toggle('active',k===this.i);s.classList.toggle('visible',k===this.i)});
+  this.count.textContent=`${this.i+1} / ${this.slides.length}`;this.bar.style.width=((this.i+1)/this.slides.length*100)+'%';history.replaceState(null,'','#'+(this.i+1))}
+ edit(){this.editing=!this.editing;document.body.classList.toggle('editing',this.editing);
+  document.getElementById('editToggle').classList.toggle('active',this.editing);
+  document.querySelectorAll('.slide h1,.slide h2,.slide h3,.slide p,.slide li,.slide .t,.slide b').forEach(el=>el.contentEditable=this.editing)}}
+const deck=new SlidePresentation();
+const hz=document.querySelector('.edit-hotzone'),et=document.getElementById('editToggle');let t;
+[hz,et].forEach(el=>{el.addEventListener('mouseenter',()=>{clearTimeout(t);et.classList.add('show')});el.addEventListener('mouseleave',()=>{t=setTimeout(()=>{if(!deck.editing)et.classList.remove('show')},400)})});
+et.onclick=()=>deck.edit();
+</script></body></html>
