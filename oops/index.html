@@ -31,6 +31,9 @@ body.hacked .top b{animation:blink .6s steps(1) infinite}
 .big{font-size:26px;line-height:1.25;font-weight:700}
 ul{list-style:none;display:flex;flex-direction:column;gap:12px}
 li{font-size:16px;line-height:1.5;color:#e4e4e4}li b{color:var(--red);margin-right:8px}
+.cancel{font:700 20px var(--mono);background:var(--red);color:#fff;border:0;padding:16px 20px;cursor:pointer;width:100%}
+.panic{border:2px solid var(--red);padding:18px;background:rgba(229,20,28,.12)}
+.panic .big{color:#fff}
 .safe{color:#7dffa3;font-size:14px}
 @media (prefers-reduced-motion:reduce){.pwn,.top b{animation:none!important}}
 </style>
@@ -48,10 +51,16 @@ li{font-size:16px;line-height:1.5;color:#e4e4e4}li b{color:var(--red);margin-rig
     <div class="skull">☠</div>
     <div class="pwn">VOCÊ FOI HACKEADO</div>
     <p style="text-align:center">Seus dados estão sendo copiados.</p>
+    <p style="text-align:center;color:var(--red)">Apagando dados do dispositivo em…</p>
     <div class="cd" id="cd">00:07</div>
+    <button class="cancel" id="cancel" type="button">CANCELAR</button>
   </section>
 
   <section id="sr" class="col hide">
+    <div class="panic hide" id="panic">
+      <p class="big">Nossa… você ainda clicou em <em>outro botão</em> no desespero?</p>
+      <p>Não prestou atenção na palestra? Num golpe de verdade, esse “cancelar” seria o segundo clique que entrega tudo. Quem foi enganado uma vez e entra em pânico costuma errar de novo.</p>
+    </div>
     <div class="rev">
       <h2>Calma. <em>Era uma demonstração.</em></h2>
       <p>Nada foi invadido, copiado ou instalado. Esta página não coleta nenhum dado seu.</p>
@@ -80,11 +89,11 @@ li{font-size:16px;line-height:1.5;color:#e4e4e4}li b{color:var(--red);margin-rig
   function hack(){
     document.body.classList.add("hacked");$("st").textContent="COMPROMETIDO";
     show("sh");
-    var s=7,cd=$("cd");
+    var s=7,cd=$("cd");$("cancel").onclick=function(){clearInterval(c);reveal(true)};
     var c=setInterval(function(){s--;cd.textContent="00:0"+Math.max(s,0);if(s<=0){clearInterval(c);reveal()}},1000);
     if(navigator.vibrate){try{navigator.vibrate([200,100,200])}catch(e){}}
   }
-  function reveal(){document.body.classList.remove("hacked");$("st").textContent="online";show("sr")}
+  function reveal(p){if(p)$("panic").classList.remove("hide");document.body.classList.remove("hacked");$("st").textContent="online";show("sr")}
 })();
 </script>
 </body>
